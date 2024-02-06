@@ -1,0 +1,9 @@
+{
+  "name": "maskify-sense",
+  "version": "1.0.0",
+  "description": "Mask sensitive data for loggers",
+  "main": "index.js",
+  "repository": "git@github.com:RomAnoX/maskify-sense.git",
+  "author": "Ulises Acosta <ulises.xsoft@gmail.com>",
+  "license": "GPL V3"
+}
