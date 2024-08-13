@@ -1,94 +1,56 @@
-const DEFAULT_REPLACER = str => `*****${str.slice(-4)}`;
+const DEFAULT_REPLACER = (str) => `*****${str.slice(-4)}`;
 
-const clone = input => JSON.parse(JSON.stringify(input));
-const isObject = input => input && typeof input === 'object';
-const isArray = input => input && Array.isArray(input);
-const isString = input => typeof input === 'string';
-const isNumber = input => typeof input === 'number';
-const isFunction = input => input && typeof input === 'function';
-const isToConvert = input => isString(input) || isNumber(input);
+const is = {
+  string: (input) => typeof input === 'string',
+  number: (input) => typeof input === 'number',
+  fn: (input) => Object.prototype.toString.call(input) === '[object Function]',
+};
 
-const convert = (input, replacer) => {
-  return isString(replacer)
+const empty = Symbol('empty');
+const toConvert = (input) => is.string(input) || is.number(input);
+
+const transform = (input, replacer) =>
+  is.string(replacer)
     ? replacer
-    : isFunction(replacer)
+    : is.fn(replacer)
     ? replacer(`${input}`)
     : input;
-};
 
-const getFields = (config, replacer) => {
+const maskify = (config) => {
   const fields = {};
-  for (const type in config) {
-    const mask = config[type].mask || replacer;
-    if (config[type].fields && isArray(config[type].fields)) {
-      config[type].fields.forEach(field => {
-        fields[field] = { type, mask };
-      });
+
+  for (const type of Object.values(config)) {
+    for (const field of type.fields) {
+      fields[field] = type.mask || empty;
     }
   }
-  return fields;
-};
 
-const maskObject = (input, config, replacer = DEFAULT_REPLACER) => {
-  const data = clone(input);
-  const fields = getFields(config, replacer);
-  for (const key in data) {
-    const element = data[key];
-    if (fields[key] && isToConvert(element)) {
-      data[key] = convert(element, fields[key].mask);
-    } else if (element && isObject(element)) {
-      data[key] = maskObject(element, config, replacer);
-    } else if (isArray(element)) {
-      data[key] = maskArray(element, config, replacer);
-    } else if (element && isString(element)) {
-      // it can be a hidden JSON
+  const createReplacer = (defaultReplacer) => (key, value) => {
+    if (fields[key] && toConvert(value)) {
+      const replacer = fields[key] === empty ? defaultReplacer : fields[key];
+      return transform(value, replacer);
+    }
+    if (is.string(value)) {
       try {
-        const newElement = JSON.parse(element);
-        if (Array.isArray(newElement)) {
-          data[key] = maskArray(newElement, config, replacer);
-        } else if (isObject(newElement)) {
-          data[key] = maskObject(newElement, config, replacer);
-        }
-        data[key] = JSON.stringify(data[key]);
-      } catch {
-        // ignore
-      }
+        const newElement = JSON.parse(value);
+        return JSON.stringify(newElement, createReplacer(defaultReplacer));
+      } catch {}
     }
-  }
-  return data;
-};
-
-const maskArray = (input, config, replacer = DEFAULT_REPLACER) => {
-  const data = [];
-  for (let i = 0; i < input.length; i++) {
-    const element = input[i];
-    if (isArray(element)) {
-      data.push(maskArray(element, config, replacer));
-    } else if (isObject(element)) {
-      data.push(maskObject(element, config, replacer));
-    } else {
-      data.push(element);
-    }
-  }
-  return data;
-};
-
-const create = config => {
-  const mask = (input, replacer = DEFAULT_REPLACER) => {
-    if (!input) return input;
-    const data = clone(input);
-    if (isArray(data)) {
-      return maskArray(data, config, replacer);
-    } else if (isObject(data)) {
-      return maskObject(data, config, replacer);
-    } else if (isToConvert(data)) {
-      return convert(data, replacer);
-    }
-    return data;
+    return value;
   };
 
+  const mask = (input, defaultReplacer = DEFAULT_REPLACER) => {
+    if (!input) return input;
+    if (toConvert(input)) return transform(input, defaultReplacer);
+
+    return JSON.parse(JSON.stringify(input, createReplacer(defaultReplacer)));
+  };
+
+  mask.is = is;
+  mask.empty = empty;
   mask.config = config;
+
   return mask;
 };
 
-module.exports = create;
+module.exports = maskify;

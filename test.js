@@ -2,7 +2,7 @@ const MaskifySense = require('./index.js');
 
 const mask = MaskifySense({
   ssn: {
-    mask: str => `+++_++_${str.slice(-4)}`,
+    mask: (str) => `+++_++_${str.slice(-4)}`,
     fields: ['ssn', 'taxId', 'sin'],
   },
   accounts: {
@@ -39,16 +39,25 @@ console.log(
 console.log(
   'Object with JSON',
   mask({
+    age: 23,
     ssn: '888-88-8888',
+    example: 'This is not a json',
     password: 'password',
     accounts: JSON.stringify([
       { account: '123', routing: '456' },
       { account: '124', routing: '987' },
     ]),
-    other: JSON.stringify({
-      sin: '999-999-999',
-      social: 'Facebook',
-      password: 'something',
-    }),
+    other: JSON.stringify([
+      {
+        sin: '999-999-999',
+        social: 'Facebook',
+        password: 'something',
+      },
+      {
+        sin: '888-888-888',
+        social: 'Twitter',
+        password: 'somethingElse',
+      },
+    ]),
   }),
 );
