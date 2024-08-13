@@ -1,4 +1,4 @@
-const MaskifySense = require('./index.js');
+const MaskifySense = require('maskify-sense');
 
 const mask = MaskifySense({
   ssn: {
@@ -29,6 +29,18 @@ console.log(
   mask({
     ssn: '888-88-8888',
     password: 'password',
+    accounts: [
+      { account: 123, routing: '456' },
+      { account: 124, routing: '987' },
+    ],
+  }),
+);
+
+console.log(
+  'Object with mask field but object value',
+  mask({
+    ssn: '888-88-8888',
+    password: { secret: 'password' },
     accounts: [
       { account: 123, routing: '456' },
       { account: 124, routing: '987' },
