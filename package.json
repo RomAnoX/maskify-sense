@@ -1,9 +1,46 @@
 {
   "name": "maskify-sense",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Mask sensitive data for loggers",
-  "main": "index.js",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs",
+      "require": "./index.js",
+      "default": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "index.mjs",
+    "index.d.ts"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "test": "node --test",
+    "demo": "node examples/demo.js"
+  },
   "repository": "git@github.com:RomAnoX/maskify-sense.git",
   "author": "Ulises Acosta <ulises.xsoft@gmail.com>",
-  "license": "GPL V3"
+  "license": "GPL-3.0",
+  "keywords": [
+    "log",
+    "logger",
+    "logging",
+    "mask",
+    "masking",
+    "redact",
+    "redaction",
+    "sensitive",
+    "secret",
+    "json",
+    "privacy",
+    "security"
+  ]
 }

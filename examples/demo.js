@@ -1,3 +1,6 @@
+// Interactive demo. Run with: npm run demo
+// (the package resolves itself through the "exports" map in package.json)
+
 const MaskifySense = require('maskify-sense');
 
 const mask = MaskifySense({
@@ -37,7 +40,7 @@ console.log(
 );
 
 console.log(
-  'Object with mask field but object value',
+  'Object with mask field but object value (now fully redacted)',
   mask({
     ssn: '888-88-8888',
     password: { secret: 'password' },
